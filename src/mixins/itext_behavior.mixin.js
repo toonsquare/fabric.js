@@ -743,7 +743,7 @@
       qty || (qty = 1);
       this.shiftLineStyles(lineIndex, qty);
       if (this.styles[lineIndex]) {
-        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex - 1];
+        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex + 1];
       }
       // we clone styles of all chars
       // after cursor onto the current line

@@ -1,7 +1,7 @@
 /* build: `node build.js modules=ALL exclude=gestures,accessors requirejs minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
 
-var fabric = fabric || { version: '3.6.4' };
+var fabric = fabric || { version: '3.6.6' };
 if (typeof exports !== 'undefined') {
   exports.fabric = fabric;
 }
@@ -27928,7 +27928,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
       qty || (qty = 1);
       this.shiftLineStyles(lineIndex, qty);
       if (this.styles[lineIndex]) {
-        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex - 1];
+        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex + 1];
       }
       // we clone styles of all chars
       // after cursor onto the current line
