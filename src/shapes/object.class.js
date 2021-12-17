@@ -798,8 +798,8 @@
       }
       if (shouldRedraw) {
         if (shouldResizeCanvas) {
-          canvas.width = Math.ceil(width + additionalWidth);
-          canvas.height = Math.ceil(height + additionalHeight);
+          canvas.width = Math.ceil(width + additionalWidth) + 500;
+          canvas.height = Math.ceil(height + additionalHeight) + 500;
         }
         else {
           this._cacheContext.setTransform(1, 0, 0, 1, 0, 0);
