@@ -682,6 +682,12 @@
         if (this.styles[lineStart]) {
           styleObj = this.styles[lineStart];
           var diff = charEnd - charStart, numericChar, _char;
+
+          // 라인에 텍스트 다 지웠을 때 스타일 초기화 방어 코드
+          if (Object.keys(this.styles[lineStart]).length === this._unwrappedTextLines[lineStart].length) {
+            this.styles[lineStart][Object.keys(this.styles[lineStart]).length] = this.styles[lineStart][Object.keys(this.styles[lineStart]).length - 1];
+          }
+
           for (i = charStart; i < charEnd; i++) {
             delete styleObj[i];
           }
@@ -738,12 +744,24 @@
       var currentCharStyle,
           newLineStyles = {},
           somethingAdded = false,
-          isEndOfLine = this._unwrappedTextLines[lineIndex].length === charIndex;
+          isEndOfLine = this._unwrappedTextLines[lineIndex].length === charIndex ? true : false,
+          refNumber,  // 참고할 스타일 위치
+          isUpperAddLine = false; // 윗쪽에 빈줄 스타일 추가
+
+      // 커서 위치에 따라 참고할 스타일 위치 변경
+      if (charIndex === this._unwrappedTextLines[lineIndex].length && this._unwrappedTextLines[lineIndex].length !== 0) {
+        refNumber = -1;
+      } else if (charIndex === 0) {
+        refNumber = 0;
+        isUpperAddLine = true;
+      } else if (charIndex < this._unwrappedTextLines[lineIndex].length) {
+        refNumber = 1;
+      }
 
       qty || (qty = 1);
       this.shiftLineStyles(lineIndex, qty);
       if (this.styles[lineIndex]) {
-        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex + 1];
+        currentCharStyle = this.styles[lineIndex][charIndex + refNumber]; // 참고 할 스타일 값 currentCharStyle에 저장
       }
       // we clone styles of all chars
       // after cursor onto the current line
@@ -758,6 +776,12 @@
           }
         }
       }
+
+      // 위에 빈 라인 생길 때 빈 라인 스타일 지정
+      if (isUpperAddLine) {
+        this.styles[lineIndex][0] = newLineStyles[0];
+      }
+
       var styleCarriedOver = false;
       if (somethingAdded && !isEndOfLine) {
         // if is end of line, the extra style we copied
