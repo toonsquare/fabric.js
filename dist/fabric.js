@@ -27839,6 +27839,11 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
           charEnd = cursorEnd.charIndex,
           i, styleObj;
       if (lineStart !== lineEnd) {
+        // 여러 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
+        if (Object.keys(this.styles[lineEnd]).length === this._unwrappedTextLines[lineEnd].length) {
+          this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length] = this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length - 1];
+        }
+
         // step1 remove the trailing of lineStart
         if (this.styles[lineStart]) {
           for (i = charStart; i < this._unwrappedTextLines[lineStart].length; i++) {
@@ -27847,7 +27852,9 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         }
         // step2 move the trailing of lineEnd to lineStart if needed
         if (this.styles[lineEnd]) {
-          for (i = charEnd; i < this._unwrappedTextLines[lineEnd].length; i++) {
+          // 위 방어 코드에 의해 마지막 줄 style 의 length 는
+          // 무조건 실제 텍스트의 length 보다 1 기므로 실제 텍스트 length 에 +1 해줌
+          for (i = charEnd; i < this._unwrappedTextLines[lineEnd].length + 1; i++) {
             styleObj = this.styles[lineEnd][i];
             if (styleObj) {
               this.styles[lineStart] || (this.styles[lineStart] = { });
@@ -27868,7 +27875,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
           styleObj = this.styles[lineStart];
           var diff = charEnd - charStart, numericChar, _char;
 
-          // 라인에 텍스트 다 지웠을 때 스타일 초기화 방어 코드
+          // 한 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
           if (Object.keys(this.styles[lineStart]).length === this._unwrappedTextLines[lineStart].length) {
             this.styles[lineStart][Object.keys(this.styles[lineStart]).length] = this.styles[lineStart][Object.keys(this.styles[lineStart]).length - 1];
           }
