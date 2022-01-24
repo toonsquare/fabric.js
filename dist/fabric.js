@@ -27839,8 +27839,9 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
           charEnd = cursorEnd.charIndex,
           i, styleObj;
       if (lineStart !== lineEnd) {
+        // this.styles 비어있을 경우 방어 코드
         // 여러 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
-        if (!this.styles && Object.keys(this.styles[lineEnd]).length === this._unwrappedTextLines[lineEnd].length) {
+        if (Object.keys(this.styles).length && Object.keys(this.styles[lineEnd]).length === this._unwrappedTextLines[lineEnd].length) {
           this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length] = this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length - 1];
         }
 
@@ -27875,8 +27876,9 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
           styleObj = this.styles[lineStart];
           var diff = charEnd - charStart, numericChar, _char;
 
+          // this.styles 비어있을 경우 방어 코드
           // 한 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
-          if (!this.styles && Object.keys(this.styles[lineStart]).length === this._unwrappedTextLines[lineStart].length) {
+          if (Object.keys(this.styles).length && Object.keys(this.styles[lineStart]).length === this._unwrappedTextLines[lineStart].length) {
             this.styles[lineStart][Object.keys(this.styles[lineStart]).length] = this.styles[lineStart][Object.keys(this.styles[lineStart]).length - 1];
           }
 
@@ -27945,7 +27947,10 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
         refNumber = -1;
       } else if (charIndex === 0) {
         refNumber = 0;
-        isUpperAddLine = true;
+        // this.styles 비어있을 경우 방어 코드
+        if (Object.keys(this.styles).length) {
+          isUpperAddLine = true;
+        }
       } else if (charIndex < this._unwrappedTextLines[lineIndex].length) {
         refNumber = 1;
       }
@@ -27970,7 +27975,7 @@ fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
       }
 
       // 위에 빈 라인 생길 때 빈 라인 스타일 지정
-      if (!this.styles && isUpperAddLine) {
+      if (isUpperAddLine) {
         this.styles[lineIndex][0] = newLineStyles[0];
       }
 
