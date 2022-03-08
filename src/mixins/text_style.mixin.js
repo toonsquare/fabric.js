@@ -177,7 +177,14 @@
             charIndex: selectionStart
           };
         }
-        selectionStart -= lines[i].length + this.missingNewlineOffset(i);
+
+        // skipWrapping === true 일 땐 마지막 줄 빼곤 모든 줄이 length 보다 1 긺.
+        if (skipWrapping) {
+          selectionStart -= lines[i].length + 1;
+        }
+        else {
+          selectionStart -= lines[i].length + this.missingNewlineOffset(i);
+        }
       }
       return {
         lineIndex: i - 1,
