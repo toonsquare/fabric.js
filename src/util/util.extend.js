@@ -33,7 +33,7 @@ fabric.util.trimCanvas = function(canvas) {
 
   w = pix.x[n] - pix.x[0] + 5;
   h = pix.y[n] - pix.y[0] + 5;
-  var cut = ctx.getImageData(pix.x[0], pix.y[0], trimWidth, trimHeight);
+  var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
 
   canvas.width = w;
   canvas.height = h;
