@@ -9381,6 +9381,447 @@ fabric.PatternBrush = fabric.util.createClass(fabric.PencilBrush, /** @lends fab
 });
 
 
+/**
+ * Drip class
+ * @class fabric.Drip
+ * @extends fabric.Object
+ */
+fabric.Drip = fabric.util.createClass(fabric.Object, {
+  rate: 0,
+  color: "#000000",
+  amount: 10,
+  life: 10,
+  _point: null,
+  _lastPoint: null,
+  _strokeId: 0,
+  _interval: 20,
+
+  initialize: function(ctx, pointer, amount, color, _strokeId) {
+    this.ctx = ctx;
+    this._point = pointer;
+    this._strokeId = _strokeId;
+    this.amount = fabric.util.getRandom(amount, amount * 0.5);
+    this.color = color;
+    this.life = this.amount * 1.5;
+    ctx.lineCap = ctx.lineJoin = "round";
+
+    this._render();
+  },
+
+  _update: function(brush) {
+    this._lastPoint = fabric.util.object.clone(this._point);
+    this._point.addEquals({
+      x: this.life * this.rate,
+      y: fabric.util.getRandom(this.life * this.amount / 30)
+    });
+
+    this.life -= 0.05;
+
+    if (fabric.util.getRandom() < 0.03) {
+      this.rate += fabric.util.getRandom(0.03, - 0.03);
+    } else if (fabric.util.getRandom() < 0.05) {
+      this.rate *= 0.01;
+    }
+  },
+
+  _draw: function() {
+    this.ctx.save();
+    this.line(this.ctx, this._lastPoint, this._point, this.color, this.amount * 0.8 + this.life * 0.2);
+    this.ctx.restore();
+  },
+
+  _render: function() {
+    var context = this;
+
+    setTimeout(draw, this._interval);
+
+    function draw() {
+      context._update();
+      context._draw();
+      if(context.life > 0) {
+        setTimeout(draw, context._interval);
+      }
+    }
+  },
+
+  line: function(ctx, point1, point2, color, lineWidth) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(point1.x, point1.y);
+    ctx.lineTo(point2.x, point2.y);
+
+    ctx.stroke();
+  }
+});
+
+
+/**
+ * Stroke class
+ * @class fabric.Stroke
+ * @extends fabric.Object
+ */
+fabric.Stroke = fabric.util.createClass(fabric.Object,{
+  color: null,
+  inkAmount: null,
+  lineWidth: null,
+  _point: null,
+  _lastPoint: null,
+  _currentLineWidth: null,
+
+  initialize: function(ctx, pointer, range, color, lineWidth, inkAmount){
+
+    var rx = fabric.util.getRandom(range),
+      c = fabric.util.getRandom(Math.PI * 2),
+      c0 = fabric.util.getRandom(Math.PI * 2),
+      x0 = rx * Math.sin(c0),
+      y0 = rx / 2 * Math.cos(c0),
+      cos = Math.cos(c),
+      sin = Math.sin(c);
+
+    this.ctx = ctx;
+    this.color = color;
+    this._point = new fabric.Point(pointer.x + x0 * cos - y0 * sin, pointer.y + x0 * sin + y0 * cos);
+    this.lineWidth = lineWidth;
+    this.inkAmount = inkAmount;
+    this._currentLineWidth = lineWidth;
+
+    ctx.lineCap = "round";
+  },
+
+  update: function(pointer, subtractPoint, distance) {
+    this._lastPoint = fabric.util.object.clone(this._point);
+    this._point = this._point.addEquals({ x: subtractPoint.x, y: subtractPoint.y });
+
+    var n = this.inkAmount / (distance + 1);
+    var per = (n > 0.3 ? 0.2 : n < 0 ? 0 : n);
+    this._currentLineWidth = this.lineWidth * per;
+  },
+
+  draw: function(){
+    var ctx = this.ctx;
+    ctx.save();
+    this.line(ctx, this._lastPoint, this._point, this.color, this._currentLineWidth);
+    ctx.restore();
+  },
+
+  line: function(ctx, point1, point2, color, lineWidth) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(point1.x, point1.y);
+    ctx.lineTo(point2.x, point2.y);
+    ctx.stroke();
+  }
+});
+
+
+/**
+ * InkBrush class
+ * @class fabric.InkBrush
+ * @extends fabric.BaseBrush
+ * Based on code by Tennison Chan.
+ */
+fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
+
+  color: "#000000",
+  opacity: 1,
+  width: 30,
+
+  _baseWidth: 20,
+  _dripCount: 0,
+  _drips: [],
+  _isDrip: false,
+  _inkAmount: 7,
+  _lastPoint: null,
+  _point: null,
+  _range: 10,
+  _strokeCount: 0,
+  _strokeId: null,
+  _strokeNum: 40,
+  _strokes: null,
+
+  initialize: function(canvas, opt) {
+    opt = opt || {};
+
+    this.canvas = canvas;
+    this.width = opt.width || canvas.freeDrawingBrush.width;
+    this.color = opt.color || canvas.freeDrawingBrush.color;
+    this.opacity = opt.opacity || canvas.contextTop.globalAlpha;
+    this._point = new fabric.Point();
+  },
+
+  _render: function(pointer) {
+    var subtractPoint, distance, point, i, len, strokes, stroke;
+    var ctx = this.canvas.contextTop;
+    this._saveAndTransform(ctx);
+    // 잉크 흐르는 효과
+    this._strokeCount++;
+    if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
+      this._dripCount++;
+    }
+
+    point = this.setPointer(pointer);
+    subtractPoint = point.subtract(this._lastPoint);
+    distance = point.distanceFrom(this._lastPoint);
+    strokes = this._strokes;
+    for (i = 0, len = strokes.length; i < len; i++) {
+      stroke = strokes[i];
+      stroke.update(point, subtractPoint, distance);
+      stroke.draw();
+    }
+
+    // 잉크 튀는 효과
+    if ((distance > 30)&&(this._isDrip)) {
+      this.drawSplash(point, this._inkAmount);
+      // 잉크 흐르는 효과
+    } else if (this._isDrip && distance < 10 && fabric.util.getRandom() < 0.085 && this._dripCount) {
+      this._drips.push(new fabric.Drip(this.canvas.contextTop, point, fabric.util.getRandom(this.size * 0.25, this.size * 0.1), this.color, this._strokeId));
+      this._dripCount--;
+    }
+    ctx.restore();
+  },
+
+  // onMouseDown: function(event){
+  //   var pointer = this.canvas.getPointer(event, true);
+  //   this._resetTip(pointer);
+  //   this._strokeId = +new Date();
+  //   this._dripCount = fabric.util.getRandom(6, 3) | 0;
+  //   this._render(pointer);
+  // },
+  //
+  // onMouseMove: function(event){
+  //   var pointer = this.canvas.getPointer(event, true);
+  //   if(this.canvas._isCurrentlyDrawing){
+  //     this._render(pointer);
+  //   };
+  // },
+
+  onMouseDown: function(pointer){
+    this._resetTip(pointer);
+    this._strokeId = +new Date();
+    this._dripCount = fabric.util.getRandom(6, 3) | 0;
+  },
+
+  onMouseMove: function(pointer){
+    if(this.canvas._isCurrentlyDrawing){
+      this._render(pointer);
+    }
+  },
+
+  onMouseUp: function(){
+    this.convertToImg();
+    this._strokeCount = 0;
+    this._dripCount = 0;
+    this._strokeId = null;
+  },
+
+  drawSplash: function(pointer, maxSize) {
+    var c, r, i, point,
+      ctx = this.canvas.contextTop,
+      num = fabric.util.getRandom(12),
+      range = maxSize * 10,
+      color = this.color;
+
+    ctx.save();
+    for (i = 0; i < num; i++) {
+      r = fabric.util.getRandom(range, 1);
+      c = fabric.util.getRandom(Math.PI * 2);
+      point = new fabric.Point(pointer.x + r * Math.sin(c), pointer.y + r * Math.cos(c));
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, fabric.util.getRandom(maxSize) / 2, 0, Math.PI * 2, false);
+      ctx.fill();
+    }
+    ctx.restore();
+  },
+
+  setPointer: function(pointer) {
+    var point = new fabric.Point(pointer.x, pointer.y);
+
+    this._lastPoint = fabric.util.object.clone(this._point);
+    this._point = point;
+
+    return point;
+  },
+
+  _resetTip: function(pointer){
+    var strokes, point, len, i;
+
+    point = this.setPointer(pointer);
+    strokes = this._strokes = [];
+    this.size = this.width / 5 + this._baseWidth;
+    this._strokeNum = this.size;
+    this._range = this.size / 2;
+
+    for (i = 0, len = this._strokeNum; i < len; i++) {
+      strokes[i] = new fabric.Stroke(this.canvas.contextTop, point, this._range, this.color, this.width, this._inkAmount);
+    }
+  }
+});
+
+
+/**
+ * MarkerBrush class
+ * @class fabric.MarkerBrush
+ * @extends fabric.BaseBrush
+ * Based on code by Tennison Chan.
+ */
+(function() {
+  fabric.MarkerBrush = fabric.util.createClass(fabric.BaseBrush, {
+
+    color: "#000000",
+    opacity: 1,
+    width: 30,
+
+    _baseWidth: 10,
+    _lastPoint: null,
+    _lineWidth: 3,
+    _point: null,
+    _size: 0,
+
+    initialize: function(canvas, opt) {
+      opt = opt || {};
+
+      this.canvas = canvas;
+      this.width = opt.width || canvas.freeDrawingBrush.width;
+      this.color = opt.color || canvas.freeDrawingBrush.color;
+      this.opacity = opt.opacity || canvas.contextTop.globalAlpha;
+      this._point = new fabric.Point();
+
+      this.canvas.contextTop.lineJoin = 'round';
+      this.canvas.contextTop.lineCap = 'round';
+    },
+    changeColor: function(color) {
+      this.color = color;
+    },
+
+    changeOpacity: function(value) {
+      this.opacity = value;
+    },
+
+    _render: function(pointer) {
+      var ctx, lineWidthDiff, i, len;
+      ctx = this.canvas.contextTop;
+      this._saveAndTransform(ctx);
+      ctx.beginPath();
+
+      for(i = 0, len = (this._size / this._lineWidth) / 2; i < len; i++) {
+        lineWidthDiff = (this._lineWidth - 1) * i;
+
+        ctx.globalAlpha = 0.8 * this.opacity;
+        ctx.moveTo(this._lastPoint.x + lineWidthDiff, this._lastPoint.y + lineWidthDiff);
+        ctx.lineTo(pointer.x + lineWidthDiff, pointer.y + lineWidthDiff);
+        ctx.stroke();
+      }
+
+      this._lastPoint = new fabric.Point(pointer.x, pointer.y);
+      ctx.restore();
+    },
+
+    // onMouseDown: function(event) {
+    //   this._lastPoint = fabric.util.object.clone(this._point);
+    //   var pointer = this.canvas.getPointer(event, true);
+    //   this.canvas.contextTop.strokeStyle = this.color;
+    //   this.canvas.contextTop.lineWidth = this._lineWidth;
+    //   this._size = this.width + this._baseWidth;
+    //   this._render(pointer);
+    // },
+    //
+    // onMouseMove: function(event) {
+    //   var pointer = this.canvas.getPointer(event, true);
+    //   if (this.canvas._isCurrentlyDrawing) {
+    //     this._render(pointer);
+    //   }
+    // },
+
+    onMouseDown: function(pointer) {
+      this._lastPoint = pointer;
+      this.canvas.contextTop.strokeStyle = this.color;
+      this.canvas.contextTop.lineWidth = this._lineWidth;
+      this._size = this.width + this._baseWidth;
+    },
+
+    onMouseMove: function(pointer) {
+      if (this.canvas._isCurrentlyDrawing) {
+        this._render(pointer);
+      }
+    },
+
+    onMouseUp: function() {
+      this.convertToImg();
+      this.canvas.contextTop.globalAlpha = this.opacity;
+    }
+  });
+})();
+
+
+/**
+ * Convert a brush drawing on the upperCanvas to an image on the fabric canvas.
+ */
+fabric.BaseBrush.prototype.convertToImg = function() {
+  var pixelRatio = this.canvas.getRetinaScaling();
+  var zoom = this.canvas.getZoom();
+  var copy = fabric.util.copyCanvasElement(this.canvas.upperCanvasEl);
+  var trimSize = fabric.util.trimCanvas(copy);
+  var img = new fabric.Image(copy);
+  this.canvas.add(img);
+  img.set({
+    originX:'center',
+    originY:'center',
+    left:(trimSize.left/zoom+trimSize.trimWidth/(2*zoom))/pixelRatio,
+    top:(trimSize.top/zoom+trimSize.trimHeight/(2*zoom))/pixelRatio,
+    'scaleX':1/zoom/pixelRatio,
+    'scaleY':1/zoom/pixelRatio}).setCoords();
+  this.canvas.clearContext(this.canvas.contextTop);
+}
+
+
+/** get random number
+ */
+fabric.util.getRandom = function(max, min){
+  min = min ? min : 0;
+  return Math.random() * ((max ? max : 1) - min) + min;
+};
+
+/**
+ * Trim a canvas. Returns the left-top coordinate where trimming began.
+ * @param {canvas} canvas A canvas element to trim. This element will be trimmed (reference).
+ * @returns {Object} Left-top coordinate of trimmed area. Example: {x:65, y:104}
+ * @see: https://stackoverflow.com/a/22267731/3360038
+ */
+fabric.util.trimCanvas = function(canvas) {
+  var ctx = canvas.getContext('2d'),
+    w = canvas.width,
+    h = canvas.height,
+    pix = {x:[], y:[]}, n,
+    imageData = ctx.getImageData(0,0,w,h),
+    fn = function(a,b) { return a-b };
+
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      if (imageData.data[((y * w + x) * 4)+3] > 0) {
+        pix.x.push(x);
+        pix.y.push(y);
+      }
+    }
+  }
+  pix.x.sort(fn);
+  pix.y.sort(fn);
+  n = pix.x.length-1;
+
+  w = pix.x[n] - pix.x[0] + 5;
+  h = pix.y[n] - pix.y[0] + 5;
+  var cut = ctx.getImageData(pix.x[0], pix.y[0], trimWidth, trimHeight);
+
+  canvas.width = w;
+  canvas.height = h;
+  ctx.putImageData(cut, 0, 0);
+  return {left:pix.x[0], top:pix.y[0], trimWidth:w, trimHeight:h} ;
+}
+
+
 (function() {
 
   var getPointer = fabric.util.getPointer,

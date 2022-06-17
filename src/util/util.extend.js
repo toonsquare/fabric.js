@@ -15,7 +15,6 @@ fabric.util.trimCanvas = function(canvas) {
   var ctx = canvas.getContext('2d'),
     w = canvas.width,
     h = canvas.height,
-    trimWidth, trimHeight,
     pix = {x:[], y:[]}, n,
     imageData = ctx.getImageData(0,0,w,h),
     fn = function(a,b) { return a-b };
@@ -32,12 +31,12 @@ fabric.util.trimCanvas = function(canvas) {
   pix.y.sort(fn);
   n = pix.x.length-1;
 
-  trimWidth = pix.x[n] - pix.x[0] + 5;
-  trimHeight = pix.y[n] - pix.y[0] + 5;
+  w = pix.x[n] - pix.x[0] + 5;
+  h = pix.y[n] - pix.y[0] + 5;
   var cut = ctx.getImageData(pix.x[0], pix.y[0], trimWidth, trimHeight);
 
-  canvas.width = trimWidth;
-  canvas.height = trimHeight;
+  canvas.width = w;
+  canvas.height = h;
   ctx.putImageData(cut, 0, 0);
-  return {left:pix.x[0], top:pix.y[0], trimWidth, trimHeight} ;
+  return {left:pix.x[0], top:pix.y[0], trimWidth:w, trimHeight:h} ;
 }
