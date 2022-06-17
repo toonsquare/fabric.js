@@ -38,10 +38,10 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     var ctx = this.canvas.contextTop;
     this._saveAndTransform(ctx);
     // 잉크 흐르는 효과
-    this._strokeCount++;
-    if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
-      this._dripCount++;
-    }
+    // this._strokeCount++;
+    // if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
+    //   this._dripCount++;
+    // }
 
     point = this.setPointer(pointer);
     subtractPoint = point.subtract(this._lastPoint);
@@ -54,35 +54,22 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     }
 
     // 잉크 튀는 효과
-    if ((distance > 30)&&(this._isDrip)) {
-      this.drawSplash(point, this._inkAmount);
-      // 잉크 흐르는 효과
-    } else if (this._isDrip && distance < 10 && fabric.util.getRandom() < 0.085 && this._dripCount) {
-      this._drips.push(new fabric.Drip(this.canvas.contextTop, point, fabric.util.getRandom(this.size * 0.25, this.size * 0.1), this.color, this._strokeId));
-      this._dripCount--;
-    }
+    // if ((distance > 30)&&(this._isDrip)) {
+    //   this.drawSplash(point, this._inkAmount);
+    //   // 잉크 흐르는 효과(위치 문제 있음)
+    // } else if (this._isDrip && distance < 10 && fabric.util.getRandom() < 0.085 && this._dripCount) {
+    //   this._drips.push(new fabric.Drip(this.canvas.contextTop, point, fabric.util.getRandom(this.size * 0.25, this.size * 0.1), this.color, this._strokeId));
+    //   this._dripCount--;
+    // }
+
     ctx.restore();
   },
-
-  // onMouseDown: function(event){
-  //   var pointer = this.canvas.getPointer(event, true);
-  //   this._resetTip(pointer);
-  //   this._strokeId = +new Date();
-  //   this._dripCount = fabric.util.getRandom(6, 3) | 0;
-  //   this._render(pointer);
-  // },
-  //
-  // onMouseMove: function(event){
-  //   var pointer = this.canvas.getPointer(event, true);
-  //   if(this.canvas._isCurrentlyDrawing){
-  //     this._render(pointer);
-  //   };
-  // },
 
   onMouseDown: function(pointer){
     this._resetTip(pointer);
     this._strokeId = +new Date();
     this._dripCount = fabric.util.getRandom(6, 3) | 0;
+    this._render(pointer);
   },
 
   onMouseMove: function(pointer){
@@ -100,10 +87,10 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
 
   drawSplash: function(pointer, maxSize) {
     var c, r, i, point,
-      ctx = this.canvas.contextTop,
-      num = fabric.util.getRandom(12),
-      range = maxSize * 10,
-      color = this.color;
+        ctx = this.canvas.contextTop,
+        num = fabric.util.getRandom(12),
+        range = maxSize * 10,
+        color = this.color;
 
     ctx.save();
     for (i = 0; i < num; i++) {

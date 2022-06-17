@@ -14,12 +14,12 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
   initialize: function(ctx, pointer, range, color, lineWidth, inkAmount){
 
     var rx = fabric.util.getRandom(range),
-      c = fabric.util.getRandom(Math.PI * 2),
-      c0 = fabric.util.getRandom(Math.PI * 2),
-      x0 = rx * Math.sin(c0),
-      y0 = rx / 2 * Math.cos(c0),
-      cos = Math.cos(c),
-      sin = Math.sin(c);
+        c = fabric.util.getRandom(Math.PI * 2),
+        c0 = fabric.util.getRandom(Math.PI * 2),
+        x0 = rx * Math.sin(c0),
+        y0 = rx / 2 * Math.cos(c0),
+        cos = Math.cos(c),
+        sin = Math.sin(c);
 
     this.ctx = ctx;
     this.color = color;

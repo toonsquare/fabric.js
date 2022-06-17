@@ -29,13 +29,7 @@
       this.canvas.contextTop.lineJoin = 'round';
       this.canvas.contextTop.lineCap = 'round';
     },
-    changeColor: function(color) {
-      this.color = color;
-    },
 
-    changeOpacity: function(value) {
-      this.opacity = value;
-    },
 
     _render: function(pointer) {
       var ctx, lineWidthDiff, i, len;
@@ -56,27 +50,12 @@
       ctx.restore();
     },
 
-    // onMouseDown: function(event) {
-    //   this._lastPoint = fabric.util.object.clone(this._point);
-    //   var pointer = this.canvas.getPointer(event, true);
-    //   this.canvas.contextTop.strokeStyle = this.color;
-    //   this.canvas.contextTop.lineWidth = this._lineWidth;
-    //   this._size = this.width + this._baseWidth;
-    //   this._render(pointer);
-    // },
-    //
-    // onMouseMove: function(event) {
-    //   var pointer = this.canvas.getPointer(event, true);
-    //   if (this.canvas._isCurrentlyDrawing) {
-    //     this._render(pointer);
-    //   }
-    // },
-
     onMouseDown: function(pointer) {
       this._lastPoint = pointer;
       this.canvas.contextTop.strokeStyle = this.color;
       this.canvas.contextTop.lineWidth = this._lineWidth;
       this._size = this.width + this._baseWidth;
+      this._render(pointer);
     },
 
     onMouseMove: function(pointer) {

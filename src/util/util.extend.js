@@ -13,11 +13,11 @@ fabric.util.getRandom = function(max, min){
  */
 fabric.util.trimCanvas = function(canvas) {
   var ctx = canvas.getContext('2d'),
-    w = canvas.width,
-    h = canvas.height,
-    pix = {x:[], y:[]}, n,
-    imageData = ctx.getImageData(0,0,w,h),
-    fn = function(a,b) { return a-b };
+      w = canvas.width,
+      h = canvas.height,
+      pix = {x:[], y:[]}, n,
+      imageData = ctx.getImageData(0,0,w,h),
+      fn = function(a,b) { return a-b };
 
   for (var y = 0; y < h; y++) {
     for (var x = 0; x < w; x++) {

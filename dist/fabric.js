@@ -9472,12 +9472,12 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
   initialize: function(ctx, pointer, range, color, lineWidth, inkAmount){
 
     var rx = fabric.util.getRandom(range),
-      c = fabric.util.getRandom(Math.PI * 2),
-      c0 = fabric.util.getRandom(Math.PI * 2),
-      x0 = rx * Math.sin(c0),
-      y0 = rx / 2 * Math.cos(c0),
-      cos = Math.cos(c),
-      sin = Math.sin(c);
+        c = fabric.util.getRandom(Math.PI * 2),
+        c0 = fabric.util.getRandom(Math.PI * 2),
+        x0 = rx * Math.sin(c0),
+        y0 = rx / 2 * Math.cos(c0),
+        cos = Math.cos(c),
+        sin = Math.sin(c);
 
     this.ctx = ctx;
     this.color = color;
@@ -9556,10 +9556,10 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     var ctx = this.canvas.contextTop;
     this._saveAndTransform(ctx);
     // 잉크 흐르는 효과
-    this._strokeCount++;
-    if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
-      this._dripCount++;
-    }
+    // this._strokeCount++;
+    // if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
+    //   this._dripCount++;
+    // }
 
     point = this.setPointer(pointer);
     subtractPoint = point.subtract(this._lastPoint);
@@ -9572,35 +9572,22 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     }
 
     // 잉크 튀는 효과
-    if ((distance > 30)&&(this._isDrip)) {
-      this.drawSplash(point, this._inkAmount);
-      // 잉크 흐르는 효과
-    } else if (this._isDrip && distance < 10 && fabric.util.getRandom() < 0.085 && this._dripCount) {
-      this._drips.push(new fabric.Drip(this.canvas.contextTop, point, fabric.util.getRandom(this.size * 0.25, this.size * 0.1), this.color, this._strokeId));
-      this._dripCount--;
-    }
+    // if ((distance > 30)&&(this._isDrip)) {
+    //   this.drawSplash(point, this._inkAmount);
+    //   // 잉크 흐르는 효과(위치 문제 있음)
+    // } else if (this._isDrip && distance < 10 && fabric.util.getRandom() < 0.085 && this._dripCount) {
+    //   this._drips.push(new fabric.Drip(this.canvas.contextTop, point, fabric.util.getRandom(this.size * 0.25, this.size * 0.1), this.color, this._strokeId));
+    //   this._dripCount--;
+    // }
+
     ctx.restore();
   },
-
-  // onMouseDown: function(event){
-  //   var pointer = this.canvas.getPointer(event, true);
-  //   this._resetTip(pointer);
-  //   this._strokeId = +new Date();
-  //   this._dripCount = fabric.util.getRandom(6, 3) | 0;
-  //   this._render(pointer);
-  // },
-  //
-  // onMouseMove: function(event){
-  //   var pointer = this.canvas.getPointer(event, true);
-  //   if(this.canvas._isCurrentlyDrawing){
-  //     this._render(pointer);
-  //   };
-  // },
 
   onMouseDown: function(pointer){
     this._resetTip(pointer);
     this._strokeId = +new Date();
     this._dripCount = fabric.util.getRandom(6, 3) | 0;
+    this._render(pointer);
   },
 
   onMouseMove: function(pointer){
@@ -9618,10 +9605,10 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
 
   drawSplash: function(pointer, maxSize) {
     var c, r, i, point,
-      ctx = this.canvas.contextTop,
-      num = fabric.util.getRandom(12),
-      range = maxSize * 10,
-      color = this.color;
+        ctx = this.canvas.contextTop,
+        num = fabric.util.getRandom(12),
+        range = maxSize * 10,
+        color = this.color;
 
     ctx.save();
     for (i = 0; i < num; i++) {
@@ -9693,13 +9680,7 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
       this.canvas.contextTop.lineJoin = 'round';
       this.canvas.contextTop.lineCap = 'round';
     },
-    changeColor: function(color) {
-      this.color = color;
-    },
 
-    changeOpacity: function(value) {
-      this.opacity = value;
-    },
 
     _render: function(pointer) {
       var ctx, lineWidthDiff, i, len;
@@ -9720,27 +9701,12 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
       ctx.restore();
     },
 
-    // onMouseDown: function(event) {
-    //   this._lastPoint = fabric.util.object.clone(this._point);
-    //   var pointer = this.canvas.getPointer(event, true);
-    //   this.canvas.contextTop.strokeStyle = this.color;
-    //   this.canvas.contextTop.lineWidth = this._lineWidth;
-    //   this._size = this.width + this._baseWidth;
-    //   this._render(pointer);
-    // },
-    //
-    // onMouseMove: function(event) {
-    //   var pointer = this.canvas.getPointer(event, true);
-    //   if (this.canvas._isCurrentlyDrawing) {
-    //     this._render(pointer);
-    //   }
-    // },
-
     onMouseDown: function(pointer) {
       this._lastPoint = pointer;
       this.canvas.contextTop.strokeStyle = this.color;
       this.canvas.contextTop.lineWidth = this._lineWidth;
       this._size = this.width + this._baseWidth;
+      this._render(pointer);
     },
 
     onMouseMove: function(pointer) {
@@ -9768,12 +9734,12 @@ fabric.BaseBrush.prototype.convertToImg = function() {
   var img = new fabric.Image(copy);
   this.canvas.add(img);
   img.set({
-    originX:'center',
-    originY:'center',
-    left:(trimSize.left/zoom+trimSize.trimWidth/(2*zoom))/pixelRatio,
-    top:(trimSize.top/zoom+trimSize.trimHeight/(2*zoom))/pixelRatio,
-    'scaleX':1/zoom/pixelRatio,
-    'scaleY':1/zoom/pixelRatio}).setCoords();
+    originX: 'center',
+    originY: 'center',
+    left: (trimSize.left/zoom+trimSize.trimWidth/(2*zoom))/pixelRatio,
+    top: (trimSize.top/zoom+trimSize.trimHeight/(2*zoom))/pixelRatio,
+    'scaleX': 1/zoom/pixelRatio,
+    'scaleY': 1/zoom/pixelRatio}).setCoords();
   this.canvas.clearContext(this.canvas.contextTop);
 }
 
@@ -9793,11 +9759,11 @@ fabric.util.getRandom = function(max, min){
  */
 fabric.util.trimCanvas = function(canvas) {
   var ctx = canvas.getContext('2d'),
-    w = canvas.width,
-    h = canvas.height,
-    pix = {x:[], y:[]}, n,
-    imageData = ctx.getImageData(0,0,w,h),
-    fn = function(a,b) { return a-b };
+      w = canvas.width,
+      h = canvas.height,
+      pix = {x:[], y:[]}, n,
+      imageData = ctx.getImageData(0,0,w,h),
+      fn = function(a,b) { return a-b };
 
   for (var y = 0; y < h; y++) {
     for (var x = 0; x < w; x++) {
