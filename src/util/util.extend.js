@@ -39,4 +39,4 @@ fabric.util.trimCanvas = function(canvas) {
   canvas.height = h;
   ctx.putImageData(cut, 0, 0);
   return {left:pix.x[0], top:pix.y[0], trimWidth:w, trimHeight:h} ;
-}
+};
