@@ -2,6 +2,7 @@
  * Stroke class
  * @class fabric.Stroke
  * @extends fabric.Object
+ * @see: https://github.com/tennisonchan/fabric-brush
  */
 fabric.Stroke = fabric.util.createClass(fabric.Object,{
   color: null,
@@ -13,6 +14,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
 
   initialize: function(ctx, pointer, range, color, lineWidth, inkAmount){
 
+    // 랜덤하게 선을 긋기 위한 초기 변수 지정
     var rx = fabric.util.getRandom(range),
         c = fabric.util.getRandom(Math.PI * 2),
         c0 = fabric.util.getRandom(Math.PI * 2),
@@ -31,6 +33,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
     ctx.lineCap = "round";
   },
 
+  // 매번 새로 선을 그을때마다 랜덤하게 지정되도록 업데이트
   update: function(pointer, subtractPoint, distance) {
     this._lastPoint = fabric.util.object.clone(this._point);
     this._point = this._point.addEquals({ x: subtractPoint.x, y: subtractPoint.y });
@@ -40,6 +43,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
     this._currentLineWidth = this.lineWidth * per;
   },
 
+  // 실제 선을 그리는 부분
   draw: function(){
     var ctx = this.ctx;
     ctx.save();

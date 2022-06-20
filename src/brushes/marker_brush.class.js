@@ -3,6 +3,7 @@
  * @class fabric.MarkerBrush
  * @extends fabric.BaseBrush
  * Based on code by Tennison Chan.
+ * @see https://github.com/tennisonchan/fabric-brush
  */
 (function() {
   fabric.MarkerBrush = fabric.util.createClass(fabric.BaseBrush, {

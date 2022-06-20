@@ -3,6 +3,7 @@
  * @class fabric.InkBrush
  * @extends fabric.BaseBrush
  * Based on code by Tennison Chan.
+ * @see https://github.com/tennisonchan/fabric-brush
  */
 fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
 
