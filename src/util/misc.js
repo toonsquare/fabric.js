@@ -418,6 +418,10 @@
     enlivenObjects: function(objects, callback, namespace, reviver) {
       objects = objects || [];
 
+      objects = objects.filter(function(value, index, arr){
+        return value !== undefined;
+      });
+
       var enlivenedObjects = [],
           numLoadedObjects = 0,
           numTotalObjects = objects.length;
