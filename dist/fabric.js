@@ -9460,6 +9460,7 @@ fabric.Drip = fabric.util.createClass(fabric.Object, {
  * Stroke class
  * @class fabric.Stroke
  * @extends fabric.Object
+ * @see: https://github.com/tennisonchan/fabric-brush
  */
 fabric.Stroke = fabric.util.createClass(fabric.Object,{
   color: null,
@@ -9471,6 +9472,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
 
   initialize: function(ctx, pointer, range, color, lineWidth, inkAmount){
 
+    // 랜덤하게 선을 긋기 위한 초기 변수 지정
     var rx = fabric.util.getRandom(range),
         c = fabric.util.getRandom(Math.PI * 2),
         c0 = fabric.util.getRandom(Math.PI * 2),
@@ -9489,6 +9491,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
     ctx.lineCap = "round";
   },
 
+  // 매번 새로 선을 그을때마다 랜덤하게 지정되도록 업데이트
   update: function(pointer, subtractPoint, distance) {
     this._lastPoint = fabric.util.object.clone(this._point);
     this._point = this._point.addEquals({ x: subtractPoint.x, y: subtractPoint.y });
@@ -9498,6 +9501,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
     this._currentLineWidth = this.lineWidth * per;
   },
 
+  // 실제 선을 그리는 부분
   draw: function(){
     var ctx = this.ctx;
     ctx.save();
@@ -9521,6 +9525,7 @@ fabric.Stroke = fabric.util.createClass(fabric.Object,{
  * @class fabric.InkBrush
  * @extends fabric.BaseBrush
  * Based on code by Tennison Chan.
+ * @see https://github.com/tennisonchan/fabric-brush
  */
 fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
 
@@ -9654,6 +9659,7 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
  * @class fabric.MarkerBrush
  * @extends fabric.BaseBrush
  * Based on code by Tennison Chan.
+ * @see https://github.com/tennisonchan/fabric-brush
  */
 (function() {
   fabric.MarkerBrush = fabric.util.createClass(fabric.BaseBrush, {
@@ -9725,10 +9731,13 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
 
 /**
  * Convert a brush drawing on the upperCanvas to an image on the fabric canvas.
+ * @return {void}
+ * @see: https://github.com/av01d/fabric-brushes
  */
 fabric.BaseBrush.prototype.convertToImg = function() {
   var pixelRatio = this.canvas.getRetinaScaling();
   var zoom = this.canvas.getZoom();
+  var scale = pixelRatio * zoom;
   var copy = fabric.util.copyCanvasElement(this.canvas.upperCanvasEl);
   var trimSize = fabric.util.trimCanvas(copy);
   var img = new fabric.Image(copy);
@@ -9736,15 +9745,16 @@ fabric.BaseBrush.prototype.convertToImg = function() {
   img.set({
     originX: 'center',
     originY: 'center',
-    left: (trimSize.left/zoom+trimSize.trimWidth/(2*zoom))/pixelRatio,
-    top: (trimSize.top/zoom+trimSize.trimHeight/(2*zoom))/pixelRatio,
-    'scaleX': 1/zoom/pixelRatio,
-    'scaleY': 1/zoom/pixelRatio}).setCoords();
+    left: (trimSize.left+trimSize.trimWidth/2-this.canvas.viewportTransform[4]*pixelRatio)/scale,
+    top: (trimSize.top+trimSize.trimHeight/2-this.canvas.viewportTransform[5]*pixelRatio)/scale,
+    scaleX: 1/scale,
+    scaleY: 1/scale}).setCoords(); // zoom과 pixelRatio를 이용해 현재 줌 상태와 기기 너비 등에 맞춰 위치와 스케일을 지정
   this.canvas.clearContext(this.canvas.contextTop);
 }
 
 
-/** get random number
+/** get random number for InkBrush
+ * @see https://github.com/tennisonchan/fabric-brush
  */
 fabric.util.getRandom = function(max, min){
   min = min ? min : 0;
@@ -9752,10 +9762,11 @@ fabric.util.getRandom = function(max, min){
 };
 
 /**
- * Trim a canvas. Returns the left-top coordinate where trimming began.
+ * Trim a canvas. Returns the left-top coordinate where trimming began & width and height.
  * @param {canvas} canvas A canvas element to trim. This element will be trimmed (reference).
- * @returns {Object} Left-top coordinate of trimmed area. Example: {x:65, y:104}
+ * @returns {Object} Left-top coordinate, width & height of trimmed area. (width & height is actually added 5 pixel)
  * @see: https://stackoverflow.com/a/22267731/3360038
+ * @see: https://github.com/av01d/fabric-brushes
  */
 fabric.util.trimCanvas = function(canvas) {
   var ctx = canvas.getContext('2d'),
@@ -9777,7 +9788,7 @@ fabric.util.trimCanvas = function(canvas) {
   pix.y.sort(fn);
   n = pix.x.length-1;
 
-  w = pix.x[n] - pix.x[0] + 5;
+  w = pix.x[n] - pix.x[0] + 5; // 실제 픽셀에 딱 맞게 지정하면 끝이 조금 잘리기 때문에 5 픽셀정도 여유 지정
   h = pix.y[n] - pix.y[0] + 5;
   var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
 
