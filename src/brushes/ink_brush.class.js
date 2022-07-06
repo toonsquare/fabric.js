@@ -43,16 +43,18 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     // if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
     //   this._dripCount++;
     // }
-
-    point = this.setPointer(pointer);
-    subtractPoint = point.subtract(this._lastPoint);
-    distance = point.distanceFrom(this._lastPoint);
-    strokes = this._strokes;
-    for (i = 0, len = strokes.length; i < len; i++) {
-      stroke = strokes[i];
-      stroke.update(point, subtractPoint, distance);
-      stroke.draw();
+    if (pointer) {
+      point = this.setPointer(pointer);
+      subtractPoint = point.subtract(this._lastPoint);
+      distance = point.distanceFrom(this._lastPoint);
+      strokes = this._strokes;
+      for (i = 0, len = strokes.length; i < len; i++) {
+        stroke = strokes[i];
+        stroke.update(point, subtractPoint, distance);
+        stroke.draw();
+      }
     }
+
 
     // 잉크 튀는 효과
     // if ((distance > 30)&&(this._isDrip)) {
@@ -74,7 +76,7 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
   },
 
   onMouseMove: function(pointer){
-    if(this.canvas._isCurrentlyDrawing){
+    if (this.canvas._isCurrentlyDrawing) {
       this._render(pointer);
     }
   },

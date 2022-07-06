@@ -36,18 +36,20 @@
       var ctx, lineWidthDiff, i, len;
       ctx = this.canvas.contextTop;
       this._saveAndTransform(ctx);
-      ctx.beginPath();
+      if (pointer) {
+        ctx.beginPath();
 
-      for(i = 0, len = (this._size / this._lineWidth) / 2; i < len; i++) {
-        lineWidthDiff = (this._lineWidth - 1) * i;
+        for(i = 0, len = (this._size / this._lineWidth) / 2; i < len; i++) {
+          lineWidthDiff = (this._lineWidth - 1) * i;
 
-        ctx.globalAlpha = 0.8 * this.opacity;
-        ctx.moveTo(this._lastPoint.x + lineWidthDiff, this._lastPoint.y + lineWidthDiff);
-        ctx.lineTo(pointer.x + lineWidthDiff, pointer.y + lineWidthDiff);
-        ctx.stroke();
+          ctx.globalAlpha = 0.8 * this.opacity;
+          ctx.moveTo(this._lastPoint.x + lineWidthDiff, this._lastPoint.y + lineWidthDiff);
+          ctx.lineTo(pointer.x + lineWidthDiff, pointer.y + lineWidthDiff);
+          ctx.stroke();
+        }
+
+        this._lastPoint = new fabric.Point(pointer.x, pointer.y);
       }
-
-      this._lastPoint = new fabric.Point(pointer.x, pointer.y);
       ctx.restore();
     },
 
