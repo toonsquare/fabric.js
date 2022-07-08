@@ -9565,16 +9565,18 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
     // if (this._strokeCount % 120 === 0 && this._dripCount < 10) {
     //   this._dripCount++;
     // }
-
-    point = this.setPointer(pointer);
-    subtractPoint = point.subtract(this._lastPoint);
-    distance = point.distanceFrom(this._lastPoint);
-    strokes = this._strokes;
-    for (i = 0, len = strokes.length; i < len; i++) {
-      stroke = strokes[i];
-      stroke.update(point, subtractPoint, distance);
-      stroke.draw();
+    if (pointer) {
+      point = this.setPointer(pointer);
+      subtractPoint = point.subtract(this._lastPoint);
+      distance = point.distanceFrom(this._lastPoint);
+      strokes = this._strokes;
+      for (i = 0, len = strokes.length; i < len; i++) {
+        stroke = strokes[i];
+        stroke.update(point, subtractPoint, distance);
+        stroke.draw();
+      }
     }
+
 
     // 잉크 튀는 효과
     // if ((distance > 30)&&(this._isDrip)) {
@@ -9596,7 +9598,7 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
   },
 
   onMouseMove: function(pointer){
-    if(this.canvas._isCurrentlyDrawing){
+    if (this.canvas._isCurrentlyDrawing) {
       this._render(pointer);
     }
   },
@@ -9692,18 +9694,21 @@ fabric.InkBrush = fabric.util.createClass(fabric.BaseBrush, {
       var ctx, lineWidthDiff, i, len;
       ctx = this.canvas.contextTop;
       this._saveAndTransform(ctx);
-      ctx.beginPath();
+      if (pointer) {
+        ctx.beginPath();
 
-      for(i = 0, len = (this._size / this._lineWidth) / 2; i < len; i++) {
-        lineWidthDiff = (this._lineWidth - 1) * i;
+        for(i = 0, len = (this._size / this._lineWidth) / 2; i < len; i++) {
+          lineWidthDiff = (this._lineWidth - 1) * i;
 
-        ctx.globalAlpha = 0.8 * this.opacity;
-        ctx.moveTo(this._lastPoint.x + lineWidthDiff, this._lastPoint.y + lineWidthDiff);
-        ctx.lineTo(pointer.x + lineWidthDiff, pointer.y + lineWidthDiff);
-        ctx.stroke();
+          ctx.globalAlpha = 0.8 * this.opacity;
+          ctx.moveTo(this._lastPoint.x + lineWidthDiff, this._lastPoint.y + lineWidthDiff);
+          ctx.lineTo(pointer.x + lineWidthDiff, pointer.y + lineWidthDiff);
+          ctx.stroke();
+        }
+
+        this._lastPoint = new fabric.Point(pointer.x, pointer.y);
       }
 
-      this._lastPoint = new fabric.Point(pointer.x, pointer.y);
       ctx.restore();
     },
 
