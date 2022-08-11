@@ -4,8 +4,8 @@
  * @tutorial {@link http://fabricjs.com/fabric-intro-part-2#image_filters}
  * @see {@link http://fabricjs.com/image-filters|ImageFilters demo}
  */
-fabric.Image = fabric.Image || { };
-fabric.Image.filters = fabric.Image.filters || { };
+fabric.Image = fabric.Image || {};
+fabric.Image.filters = fabric.Image.filters || {};
 
 /**
  * Root filter class from which all filter classes inherit from
@@ -29,22 +29,22 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
   vertexSource: 'attribute vec2 aPosition;\n' +
     'varying vec2 vTexCoord;\n' +
     'void main() {\n' +
-      'vTexCoord = aPosition;\n' +
-      'gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);\n' +
+    'vTexCoord = aPosition;\n' +
+    'gl_Position = vec4(aPosition * 2.0 - 1.0, 0.0, 1.0);\n' +
     '}',
 
   fragmentSource: 'precision highp float;\n' +
     'varying vec2 vTexCoord;\n' +
     'uniform sampler2D uTexture;\n' +
     'void main() {\n' +
-      'gl_FragColor = texture2D(uTexture, vTexCoord);\n' +
+    'gl_FragColor = texture2D(uTexture, vTexCoord);\n' +
     '}',
 
   /**
    * Constructor
    * @param {Object} [options] Options object
    */
-  initialize: function(options) {
+  initialize: function (options) {
     if (options) {
       this.setOptions(options);
     }
@@ -54,7 +54,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * Sets filter's properties from options
    * @param {Object} [options] Options object
    */
-  setOptions: function(options) {
+  setOptions: function (options) {
     for (var prop in options) {
       this[prop] = options[prop];
     }
@@ -67,10 +67,10 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {String} fragmentSource fragmentShader source for compilation
    * @param {String} vertexSource vertexShader source for compilation
    */
-  createProgram: function(gl, fragmentSource, vertexSource) {
+  createProgram: function (gl, fragmentSource, vertexSource) {
     fragmentSource = fragmentSource || this.fragmentSource;
     vertexSource = vertexSource || this.vertexSource;
-    if (fabric.webGlPrecision !== 'highp'){
+    if (fabric.webGlPrecision !== 'highp') {
       fragmentSource = fragmentSource.replace(
         /precision highp float/g,
         'precision ' + fabric.webGlPrecision + ' float'
@@ -111,7 +111,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
     }
 
     var attributeLocations = this.getAttributeLocations(gl, program);
-    var uniformLocations = this.getUniformLocations(gl, program) || { };
+    var uniformLocations = this.getUniformLocations(gl, program) || {};
     uniformLocations.uStepW = gl.getUniformLocation(program, 'uStepW');
     uniformLocations.uStepH = gl.getUniformLocation(program, 'uStepH');
     return {
@@ -128,7 +128,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLShaderProgram} program The shader program from which to take attribute locations.
    * @returns {Object} A map of attribute names to attribute locations.
    */
-  getAttributeLocations: function(gl, program) {
+  getAttributeLocations: function (gl, program) {
     return {
       aPosition: gl.getAttribLocation(program, 'aPosition'),
     };
@@ -145,7 +145,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    */
   getUniformLocations: function (/* gl, program */) {
     // in case i do not need any special uniform i need to return an empty object
-    return { };
+    return {};
   },
 
   /**
@@ -154,7 +154,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLRenderingContext} gl The canvas context used to compile the shader program.
    * @param {Object} attributeLocations A map of shader attribute names to their locations.
    */
-  sendAttributeData: function(gl, attributeLocations, aPositionData) {
+  sendAttributeData: function (gl, attributeLocations, aPositionData) {
     var attributeLocation = attributeLocations.aPosition;
     var buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -163,7 +163,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
     gl.bufferData(gl.ARRAY_BUFFER, aPositionData, gl.STATIC_DRAW);
   },
 
-  _setupFrameBuffer: function(options) {
+  _setupFrameBuffer: function (options) {
     var gl = options.context, width, height;
     if (options.passes > 1) {
       width = options.destinationWidth;
@@ -174,15 +174,14 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
       }
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D,
         options.targetTexture, 0);
-    }
-    else {
+    } else {
       // draw last filter on canvas and not to framebuffer.
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.finish();
     }
   },
 
-  _swapTextures: function(options) {
+  _swapTextures: function (options) {
     options.passes--;
     options.pass++;
     var temp = options.targetTexture;
@@ -197,9 +196,9 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * Other filters may need their own verison ( ColorMatrix, HueRotation, gamma, ComposedFilter )
    * @param {Object} options
    **/
-  isNeutralState: function(/* options */) {
+  isNeutralState: function (/* options */) {
     var main = this.mainParameter,
-        _class = fabric.Image.filters[this.type].prototype;
+      _class = fabric.Image.filters[this.type].prototype;
     if (main) {
       if (Array.isArray(_class[main])) {
         for (var i = _class[main].length; i--;) {
@@ -208,12 +207,10 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
           }
         }
         return true;
-      }
-      else {
+      } else {
         return _class[main] === this[main];
       }
-    }
-    else {
+    } else {
       return false;
     }
   },
@@ -231,14 +228,17 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLRenderingContext} options.context The GL context used for rendering.
    * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type.
    */
-  applyTo: function(options) {
-    if (options.webgl) {
-      this._setupFrameBuffer(options);
-      this.applyToWebGL(options);
-      this._swapTextures(options);
-    }
-    else {
-      this.applyTo2d(options);
+  applyTo: function (options) {
+    try {
+      if (options.webgl) {
+        this._setupFrameBuffer(options);
+        this.applyToWebGL(options);
+        this._swapTextures(options);
+      } else {
+        this.applyTo2d(options);
+      }
+    } catch (e) {
+      console.error(e);
     }
   },
 
@@ -248,7 +248,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLRenderingContext} options.context The GL context used for rendering.
    * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type.
    */
-  retrieveShader: function(options) {
+  retrieveShader: function (options) {
     if (!options.programCache.hasOwnProperty(this.type)) {
       options.programCache[this.type] = this.createProgram(options.context);
     }
@@ -267,13 +267,12 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLRenderingContext} options.context The GL context used for rendering.
    * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type.
    */
-  applyToWebGL: function(options) {
+  applyToWebGL: function (options) {
     var gl = options.context;
     var shader = this.retrieveShader(options);
     if (options.pass === 0 && options.originalTexture) {
       gl.bindTexture(gl.TEXTURE_2D, options.originalTexture);
-    }
-    else {
+    } else {
       gl.bindTexture(gl.TEXTURE_2D, options.sourceTexture);
     }
     gl.useProgram(shader.program);
@@ -287,24 +286,24 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   },
 
-  bindAdditionalTexture: function(gl, texture, textureUnit) {
+  bindAdditionalTexture: function (gl, texture, textureUnit) {
     gl.activeTexture(textureUnit);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     // reset active texture to 0 as usual
     gl.activeTexture(gl.TEXTURE0);
   },
 
-  unbindAdditionalTexture: function(gl, textureUnit) {
+  unbindAdditionalTexture: function (gl, textureUnit) {
     gl.activeTexture(textureUnit);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.activeTexture(gl.TEXTURE0);
   },
 
-  getMainParameter: function() {
+  getMainParameter: function () {
     return this[this.mainParameter];
   },
 
-  setMainParameter: function(value) {
+  setMainParameter: function (value) {
     this[this.mainParameter] = value;
   },
 
@@ -316,7 +315,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * @param {WebGLRenderingContext} gl The canvas context used to compile the shader program.
    * @param {Object} uniformLocations A map of shader uniform names to their locations.
    */
-  sendUniformData: function(/* gl, uniformLocations */) {
+  sendUniformData: function (/* gl, uniformLocations */) {
     // Intentionally left blank.  Override me in subclasses.
   },
 
@@ -324,7 +323,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * If needed by a 2d filter, this functions can create an helper canvas to be used
    * remember that options.targetCanvas is available for use till end of chain.
    */
-  createHelpLayer: function(options) {
+  createHelpLayer: function (options) {
     if (!options.helpLayer) {
       var helpLayer = document.createElement('canvas');
       helpLayer.width = options.sourceWidth;
@@ -337,8 +336,8 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * Returns object representation of an instance
    * @return {Object} Object representation of an instance
    */
-  toObject: function() {
-    var object = { type: this.type }, mainP = this.mainParameter;
+  toObject: function () {
+    var object = {type: this.type}, mainP = this.mainParameter;
     if (mainP) {
       object[mainP] = this[mainP];
     }
@@ -349,13 +348,13 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass(/** @lends fabric.Imag
    * Returns a JSON representation of an instance
    * @return {Object} JSON
    */
-  toJSON: function() {
+  toJSON: function () {
     // delegate, not alias
     return this.toObject();
   }
 });
 
-fabric.Image.filters.BaseFilter.fromObject = function(object, callback) {
+fabric.Image.filters.BaseFilter.fromObject = function (object, callback) {
   var filter = new fabric.Image.filters[object.type](object);
   callback && callback(filter);
   return filter;
