@@ -332,7 +332,8 @@
         // if using splitByGrapheme words are already in graphemes.
         word = splitByGrapheme ? words[i] : fabric.util.string.graphemeSplit(words[i]);
         wordWidth = this._measureWord(word, lineIndex, offset);
-        offset += word.length;
+        // 중복으로 주석처리: 텍스트박스 자간이슈 발생시 확인 필요
+        // offset += word.length;
 
         lineWidth += infixWidth + wordWidth - additionalSpace;
 
