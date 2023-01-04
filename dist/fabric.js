@@ -15207,8 +15207,8 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, /** @lends fabric.Stati
       }
 
       var target = this.findTarget(e);
-      target.lockMovementX = true;
-      target.lockMovementY = true;
+      target.lockMovementX || (target.lockMovementX = true);
+      target.lockMovementY || (target.lockMovementY = true);
 
       if ('undefined' !== typeof target) {
         this.__gesturesParams = {
