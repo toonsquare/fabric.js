@@ -26,6 +26,10 @@
       }
 
       var target = this.findTarget(e);
+
+      target.lockMovementX || (target.lockMovementX = true);
+      target.lockMovementY || (target.lockMovementY = true);
+
       if ('undefined' !== typeof target) {
         this.__gesturesParams = {
           e: e,
