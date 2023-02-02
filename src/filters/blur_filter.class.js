@@ -72,7 +72,9 @@
     /**
      * blur value, in percentage of image dimensions.
      * specific to keep the image blur constant at different resolutions
-     * range bewteen 0 and 1.
+     * range between 0 and 1.
+     * @type Number
+     * @default
      */
     blur: 0,
 

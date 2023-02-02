@@ -8,47 +8,46 @@
   }
 
   var REFERENCE_OBJECT = {
-    'version':                  fabric.version,
-    'type':                     'polygon',
-    'originX':                  'left',
-    'originY':                  'top',
-    'left':                     9.5,
-    'top':                      11.5,
-    'width':                    10,
-    'height':                   10,
-    'fill':                     'rgb(0,0,0)',
-    'stroke':                   null,
-    'strokeWidth':              1,
-    'strokeDashArray':          null,
-    'strokeLineCap':            'butt',
-    'strokeDashOffset':         0,
-    'strokeLineJoin':           'miter',
-    'strokeMiterLimit':         4,
-    'scaleX':                   1,
-    'scaleY':                   1,
-    'angle':                    0,
-    'flipX':                    false,
-    'flipY':                    false,
-    'opacity':                  1,
-    'points':                   getPoints(),
-    'shadow':                   null,
-    'visible':                  true,
-    'backgroundColor':          '',
-    'clipTo':                   null,
-    'fillRule':                 'nonzero',
-    'paintFirst':               'fill',
-    'globalCompositeOperation': 'source-over',
-    'skewX':                    0,
-    'skewY':                    0,
-    'transformMatrix':          null
+    version:                  fabric.version,
+    type:                     'polygon',
+    originX:                  'left',
+    originY:                  'top',
+    left:                     9.5,
+    top:                      11.5,
+    width:                    10,
+    height:                   10,
+    fill:                     'rgb(0,0,0)',
+    stroke:                   null,
+    strokeWidth:              1,
+    strokeDashArray:          null,
+    strokeLineCap:            'butt',
+    strokeDashOffset:         0,
+    strokeLineJoin:           'miter',
+    strokeMiterLimit:         4,
+    scaleX:                   1,
+    scaleY:                   1,
+    angle:                    0,
+    flipX:                    false,
+    flipY:                    false,
+    opacity:                  1,
+    points:                   getPoints(),
+    shadow:                   null,
+    visible:                  true,
+    backgroundColor:          '',
+    fillRule:                 'nonzero',
+    paintFirst:               'fill',
+    globalCompositeOperation: 'source-over',
+    skewX:                    0,
+    skewY:                    0,
+    strokeUniform:              false
   };
 
   var REFERENCE_EMPTY_OBJECT = {
-    'points': [],
-    'width': 0,
-    'height': 0,
-    'top': 0,
-    'left': 0
+    points: [],
+    width: 0,
+    height: 0,
+    top: 0,
+    left: 0
   };
 
   QUnit.module('fabric.Polygon');
@@ -63,6 +62,27 @@
 
     assert.equal(polygon.type, 'polygon');
     assert.deepEqual(polygon.get('points'), [{ x: 10, y: 12 }, { x: 20, y: 22 }]);
+  });
+
+  QUnit.test('polygon with exactBoundingBox false', function(assert) {
+    var polygon = new fabric.Polygon([{ x: 10, y: 10 }, { x: 20, y: 10 }, { x: 20, y: 100 }], {
+      exactBoundingBox: false,
+      strokeWidth: 60,
+    });
+    var dimensions = polygon._getNonTransformedDimensions();
+    assert.equal(dimensions.x, 70);
+    assert.equal(dimensions.y, 150);
+  });
+
+  QUnit.test('polygon with exactBoundingBox true', function(assert) {
+    var polygon = new fabric.Polygon([{ x: 10, y: 10 }, { x: 20, y: 10 }, { x: 20, y: 100 }], {
+      exactBoundingBox: true,
+      strokeWidth: 60,
+    });
+
+    var dimensions = polygon._getNonTransformedDimensions();
+    assert.equal(Math.round(dimensions.x), 74);
+    assert.equal(Math.round(dimensions.y), 162);
   });
 
   QUnit.test('complexity', function(assert) {
@@ -149,7 +169,7 @@
     elPolygonWithAttrs.setAttributeNS(namespace, 'transform', 'translate(-10,-20) scale(2)');
     elPolygonWithAttrs.setAttributeNS(namespace, 'stroke-dasharray', '5, 2');
     elPolygonWithAttrs.setAttributeNS(namespace, 'stroke-linecap', 'round');
-    elPolygonWithAttrs.setAttributeNS(namespace, 'stroke-linejoin', 'bevil');
+    elPolygonWithAttrs.setAttributeNS(namespace, 'stroke-linejoin', 'bevel');
     elPolygonWithAttrs.setAttributeNS(namespace, 'stroke-miterlimit', '5');
     fabric.Polygon.fromElement(elPolygonWithAttrs, function(polygonWithAttrs) {
       var expectedPoints = [
@@ -159,22 +179,20 @@
         { x: 10, y: 10 }
       ];
       assert.deepEqual(polygonWithAttrs.toObject(), fabric.util.object.extend(REFERENCE_OBJECT, {
-        'width':            20,
-        'height':           20,
-        'fill':             'rgb(255,255,255)',
-        'stroke':           'blue',
-        'strokeWidth':      3,
-        'strokeDashArray':  [5, 2],
-        'strokeLineCap':    'round',
-        'strokeLineJoin':   'bevil',
-        'strokeMiterLimit': 5,
-        'opacity':          0.34,
-        'points':           expectedPoints,
-        'top':              10,
-        'left':             10,
-        'transformMatrix':  [2, 0, 0, 2, -10, -20]
+        width:            20,
+        height:           20,
+        fill:             'rgb(255,255,255)',
+        stroke:           'blue',
+        strokeWidth:      3,
+        strokeDashArray:  [5, 2],
+        strokeLineCap:    'round',
+        strokeLineJoin:   'bevel',
+        strokeMiterLimit: 5,
+        opacity:          0.34,
+        points:           expectedPoints,
+        top:              10,
+        left:             10,
       }));
-      assert.deepEqual(polygonWithAttrs.get('transformMatrix'), [2, 0, 0, 2, -10, -20]);
     });
   });
   QUnit.test('fromElement with null', function(assert) {

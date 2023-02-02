@@ -2,6 +2,9 @@ var cp = require('child_process');
 var path = require('path');
 var fs = require('fs');
 
+// useful changelog regexp for atom
+// \(#([0-9]+)\) [#$1](https://github.com/fabricjs/fabric.js/pull/$1)
+
 // eslint-disable-next-line no-undef
 var pkgPath = path.resolve(__dirname, './package.json');
 var pkgText = fs.readFileSync(pkgPath); // get original pkg text to restore it later
@@ -11,7 +14,7 @@ var preRelease = process.env.PRE_RELEASE;
 
 // allow publishing of pre-releases with beta tag
 if (preRelease === 'true') {
-  console.log('Adding the tag `beta` to this release');
+  console.log('Adding beta tag to NPM publish');
   args = '--tag beta ' + args;
 }
 

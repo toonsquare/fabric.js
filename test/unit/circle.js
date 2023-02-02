@@ -86,41 +86,40 @@
   QUnit.test('toObject', function(assert) {
     var circle = new fabric.Circle();
     var defaultProperties = {
-      'version':                  fabric.version,
-      'type':                     'circle',
-      'originX':                  'left',
-      'originY':                  'top',
-      'left':                     0,
-      'top':                      0,
-      'width':                    0,
-      'height':                   0,
-      'fill':                     'rgb(0,0,0)',
-      'stroke':                   null,
-      'strokeWidth':              1,
-      'strokeDashArray':          null,
-      'strokeLineCap':            'butt',
-      'strokeDashOffset':         0,
-      'strokeLineJoin':           'miter',
-      'strokeMiterLimit':         4,
-      'scaleX':                   1,
-      'scaleY':                   1,
-      'angle':                    0,
-      'flipX':                    false,
-      'flipY':                    false,
-      'opacity':                  1,
-      'shadow':                   null,
-      'visible':                  true,
-      'backgroundColor':          '',
-      'clipTo':                   null,
-      'fillRule':                 'nonzero',
-      'paintFirst':               'fill',
-      'globalCompositeOperation': 'source-over',
-      'radius':                   0,
-      'startAngle':               0,
-      'endAngle':                 2 * Math.PI,
-      'skewX':                    0,
-      'skewY':                    0,
-      'transformMatrix':          null
+      version:                  fabric.version,
+      type:                     'circle',
+      originX:                  'left',
+      originY:                  'top',
+      left:                     0,
+      top:                      0,
+      width:                    0,
+      height:                   0,
+      fill:                     'rgb(0,0,0)',
+      stroke:                   null,
+      strokeWidth:              1,
+      strokeDashArray:          null,
+      strokeLineCap:            'butt',
+      strokeDashOffset:         0,
+      strokeLineJoin:           'miter',
+      strokeMiterLimit:         4,
+      scaleX:                   1,
+      scaleY:                   1,
+      angle:                    0,
+      flipX:                    false,
+      flipY:                    false,
+      opacity:                  1,
+      shadow:                   null,
+      visible:                  true,
+      backgroundColor:          '',
+      fillRule:                 'nonzero',
+      paintFirst:               'fill',
+      globalCompositeOperation: 'source-over',
+      radius:                   0,
+      startAngle:               0,
+      endAngle:                 360,
+      skewX:                    0,
+      skewY:                    0,
+      strokeUniform:            false
     };
     assert.ok(typeof circle.toObject === 'function');
     assert.deepEqual(circle.toObject(), defaultProperties);
@@ -147,7 +146,7 @@
   });
 
   QUnit.test('toSVG with half circle', function(assert) {
-    var circle = new fabric.Circle({ width: 100, height: 100, radius: 10, endAngle: Math.PI });
+    var circle = new fabric.Circle({ width: 100, height: 100, radius: 10, endAngle: fabric.util.radiansToDegrees(Math.PI) });
     var svg = circle.toSVG();
     var svgClipPath = circle.toClipPathSVG();
     assert.equal(svg, '<g transform=\"matrix(1 0 0 1 10.5 10.5)\"  >\n<path d=\"M 10 0 A 10 10 0 0 1 -10 0\" style=\"stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;\"   />\n</g>\n');
@@ -167,7 +166,7 @@
         strokeWidth      = 2,
         strokeDashArray  = [5, 2],
         strokeLineCap    = 'round',
-        strokeLineJoin   = 'bevil',
+        strokeLineJoin   = 'bevel',
         strokeMiterLimit = 5;
 
 

@@ -106,6 +106,21 @@
       { left: 100, top: 200, width: 600, height: 600 });
   });
 
+  QUnit.test('parseAttributeFontValueStartWithFontSize', function(assert) {
+    var element = fabric.document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path'
+    );
+    element.setAttribute('style', 'font: 15px arial, sans-serif;');
+    var styleObj = fabric.parseAttributes(element, ['font']);
+    var expectedObject = {
+      font: '15px arial, sans-serif',
+      fontSize: 15,
+      fontFamily: 'arial, sans-serif'
+    };
+    assert.deepEqual(styleObj, expectedObject);
+  });
+
   QUnit.test('parseElements', function(assert) {
     var done = assert.async();
     assert.ok(typeof fabric.parseElements === 'function');
@@ -447,7 +462,7 @@
     fabric.loadSVGFromString(string, function(objects) {
       assert.equal(objects[0].fill, 'rgba(255,0,0,0.3)', 'first circle has opacity 0.3 from rgba');
       assert.equal(objects[0].fillOpacity, 1,'first circle has fill-opacity 1');
-      assert.equal(objects[1].fill, 'rgba(0,255,0,0.25)', 'first circle has opacity 0.5 from rgba and 0.5 from gtoup fill opacity');
+      assert.equal(objects[1].fill, 'rgba(0,255,0,0.25)', 'first circle has opacity 0.5 from rgba and 0.5 from group fill opacity');
       assert.equal(objects[1].fillOpacity, 0.5,'first circle has fill-opacity 0.5');
       assert.equal(objects[2].fill, 'rgba(255,0,0,0.5)', 'first circle has opacity 0.5 from group fill opacity');
       assert.equal(objects[2].fillOpacity, 0.5,'first circle has fill-opacity 0.5');
@@ -783,6 +798,37 @@
 
     fabric.loadSVGFromString(string, function(objects) {
       assert.equal(objects[0].type, 'rect');
+      done();
+    });
+  });
+
+  QUnit.test('parseSVGFromString with empty <use/>', function(assert) {
+    var done = assert.async();
+    var string =
+      '<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+        '<use/>' +
+        '<rect width="10" height="10" />' +
+      '</svg>';
+
+    fabric.loadSVGFromString(string, function(objects) {
+      assert.equal(objects[0].type, 'rect');
+      done();
+    });
+  });
+
+  QUnit.test('parseSVGFromString with <use/> having base64 image href', function(assert) {
+    var done = assert.async();
+    var string =
+      '<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+        '<defs>' +
+          '<image id="image" x="0" y="0" width="4346.7" height="4346.7" xlink:href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/>' +
+        '</defs>' +
+        '<use xlink:href="#image"/>' +
+        '<rect width="10" height="10" />' +
+      '</svg>';
+
+    fabric.loadSVGFromString(string, function(objects) {
+      assert.equal(objects[0].type, 'image');
       done();
     });
   });

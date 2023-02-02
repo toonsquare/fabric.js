@@ -1,14 +1,11 @@
-### Fabric
-
-<!-- chat, support -->
-
-[![Gitter](https://badges.gitter.im/JoinChat.svg)](https://gitter.im/kangax/fabric.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+## Fabric.js
 
 <!-- build/coverage status, climate -->
 
 [![Build Status](https://secure.travis-ci.org/fabricjs/fabric.js.svg?branch=master)](http://travis-ci.org/#!/kangax/fabric.js)
 [![Code Climate](https://d3s6mut3hikguw.cloudfront.net/github/kangax/fabric.js/badges/gpa.svg)](https://codeclimate.com/github/kangax/fabric.js)
 [![Coverage Status](https://coveralls.io/repos/fabricjs/fabric.js/badge.png?branch=master)](https://coveralls.io/r/kangax/fabric.js?branch=master)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/fabricjs/fabric.js)
 
 <!-- npm, bower, CDNJS versions, downloads -->
 
@@ -16,11 +13,6 @@
 [![NPM version](https://badge.fury.io/js/fabric.svg)](http://badge.fury.io/js/fabric)
 [![Downloads per month](https://img.shields.io/npm/dm/fabric.svg)](https://www.npmjs.org/package/fabric)
 [![CDNJS version](https://img.shields.io/cdnjs/v/fabric.js.svg)](https://cdnjs.com/libraries/fabric.js)
-
-<!-- deps status -->
-
-[![Dependency Status](https://david-dm.org/kangax/fabric.js.svg?theme=shields.io)](https://david-dm.org/kangax/fabric.js)
-[![devDependency Status](https://david-dm.org/kangax/fabric.js/dev-status.svg?theme=shields.io)](https://david-dm.org/kangax/fabric.js#info=devDependencies)
 
 <!-- bounties, tips -->
 
@@ -54,11 +46,12 @@ Fabric.js allows you to easily create simple shapes like rectangles, circles, tr
 
 ### Supported browsers
 
-- Firefox 2+
-- Safari 3+
+- Firefox 4+
+- Safari 5+
 - Opera 9.64+
 - Chrome (all versions)
-- IE10, IE11, Edge
+- Edge (chromium based, all versions)
+- IE11 and Edge legacy, not supported. Fabric up to 5.0 is written with ES5 in mind, but no specific tests are run for those browsers.
 
 You can [run automated unit tests](http://fabricjs.com/test/unit/) right in the browser.
 
@@ -66,15 +59,36 @@ You can [run automated unit tests](http://fabricjs.com/test/unit/) right in the 
 
 Fabric.js started as a foundation for design editor on [printio.ru](http://printio.ru) — interactive online store with ability to create your own designs. The idea was to create [Javascript-based editor](http://printio.ru/ringer_man_tees/new), which would make it easy to manipulate vector shapes and images on T-Shirts. Since performance was one of the most critical requirements, we chose canvas over SVG. While SVG is excellent with static shapes, it's not as performant as canvas when it comes to dynamic manipulation of objects (movement, scaling, rotation, etc.). Fabric.js was heavily inspired by [Ernest Delgado's canvas experiment](http://www.ernestdelgado.com/public-tests/canvasphoto/demo/canvas.html). In fact, code from Ernest's experiment was the foundation of an entire framework. Later, Fabric.js grew into a collection of distinct object types and got an SVG-to-canvas parser.
 
+### Installation Instructions
+
 <h3 id="bower-install">Install with bower</h3>
 
     $ bower install fabric
 
 <h3 id="npm-install">Install with npm</h3>
 
-To install Fabric.js using npm, you must first manually [install Cairo](http://cairographics.org/download/) on your system. Cairo is a system library which powers node-canvas, which Fabric.js relies on. When the installation is complete, you may need to restart your terminal or command prompt before installing fabric.
+Note: If you are using Fabric.js in a Node.js script, you will depend from [node-canvas](https://github.com/Automattic/node-canvas).`node-canvas` is an html canvas replacement that works on top of native libraries.
+Please follow the instructions located [here](https://github.com/Automattic/node-canvas#compiling) in order to get it up and running.
+
 
     $ npm install fabric --save
+
+
+After this, you can import fabric like so:
+
+```
+const fabric = require("fabric").fabric;
+```
+
+Or you can use this instead if your build pipeline supports ES6 imports:
+
+```
+import { fabric } from "fabric";
+```
+
+NOTE: es6 imports won't work in browser or with bundlers which expect es6 module like vite. Use commonjs syntax instead.
+
+See [the example section](#examples-of-use) for usage examples.
 
 <h3 id="fabric-building">Building</h3>
 
@@ -182,6 +196,7 @@ These are the optional modules that could be specified for inclusion, when build
 - **easing** — Adds support for animation easing functions
 - **node** — Adds support for running fabric under node.js, with help of [jsdom](https://github.com/tmpvar/jsdom) and [node-canvas](https://github.com/learnboost/node-canvas) libraries.
 - **freedrawing** — Adds support for free drawing
+- **erasing** — Adds support for object erasing using an eraser brush
 - **gestures** — Adds support for multitouch gestures with help of [Event.js](https://github.com/mudcube/Event.js)
 - **object_straightening** — Adds support for rotating an object to one of 0, 90, 180, 270, etc. depending on which is angle is closer.
 - **animation** — Adds support for animation (`fabric.util.animate`, `fabric.util.requestAnimFrame`, `fabric.Object#animate`, `fabric.Canvas#fxCenterObjectH/#fxCenterObjectV/#fxRemove`)
@@ -231,6 +246,7 @@ For example:
 
 - [Fabric on Bountysource](https://www.bountysource.com/trackers/23217-fabric-js)
 - [Fabric on CodeTriage](http://www.codetriage.com/kangax/fabric.js)
+- [Contributing](./CONTRIBUTING.md)
 
 ### Staying in touch
 
@@ -274,6 +290,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/fabric.js/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

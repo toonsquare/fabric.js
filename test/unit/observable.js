@@ -3,11 +3,12 @@ QUnit.module('fabric.Observable');
 QUnit.test('fabric.Observable exists', function(assert) {
   assert.ok(fabric.Observable);
   assert.ok(fabric.Observable.fire);
-  assert.ok(fabric.Observable.observe);
-  assert.ok(fabric.Observable.stopObserving);
+  assert.ok(fabric.Observable.on);
+  assert.ok(fabric.Observable.once);
+  assert.ok(fabric.Observable.off);
 });
 
-QUnit.test('fire + observe', function(assert) {
+QUnit.test('fire + on', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -20,7 +21,60 @@ QUnit.test('fire + observe', function(assert) {
   assert.equal(eventFired, true);
 });
 
-QUnit.test('stopObserving', function(assert) {
+QUnit.test('fire once', function (assert) {
+  var foo = {};
+  fabric.util.object.extend(foo, fabric.Observable);
+
+  var eventFired = 0;
+  foo.once('bar:baz', function () {
+    assert.equal(this, foo);
+    eventFired++;
+  });
+
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+});
+
+QUnit.test('fire once multiple handlers', function (assert) {
+  var foo = {};
+  fabric.util.object.extend(foo, fabric.Observable);
+  var eventFired = 0;
+  var eventFired2 = 0;
+  var eventFired3 = 0;
+  var eventData = { a: 'b', c: 'd' };
+  foo.once({
+    'bar:baz': function () {
+      eventFired++;
+      assert.equal(this, foo);
+    },
+    'blah:blah': function () {
+      eventFired2++;
+      assert.equal(this, foo);
+    },
+    'blah:blah:bloo': function (e) {
+      eventFired3++;
+      assert.equal(this, foo);
+      assert.deepEqual(arguments[0], eventData);
+      assert.equal(e, eventData);
+    }
+  });
+  foo.fire('bar:baz');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 0);
+  foo.fire('blah:blah');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 1);
+  foo.fire('bar:baz');
+  foo.fire('blah:blah');
+  assert.equal(eventFired, 1);
+  assert.equal(eventFired2, 1);
+  assert.equal(eventFired3, 0);
+  foo.fire('blah:blah:bloo', eventData);
+});
+
+QUnit.test('off', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -29,13 +83,13 @@ QUnit.test('stopObserving', function(assert) {
     eventFired = true;
   };
   foo.on('bar:baz', handler);
-  foo.stopObserving('bar:baz', handler);
+  foo.off('bar:baz', handler);
 
   foo.fire('bar:baz');
   assert.equal(eventFired, false);
 });
 
-QUnit.test('stopObserving without handler', function(assert) {
+QUnit.test('off without handler', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -50,7 +104,7 @@ QUnit.test('stopObserving without handler', function(assert) {
   foo.on('bar:baz', handler);
   foo.on('bar:baz', handler2);
 
-  foo.stopObserving('bar:baz');
+  foo.off('bar:baz');
 
   foo.fire('bar:baz');
   assert.equal(eventFired, false);
@@ -59,14 +113,14 @@ QUnit.test('stopObserving without handler', function(assert) {
   foo.on('bar:baz', handler);
   foo.on('bar:baz', handler2);
 
-  foo.stopObserving({'bar:baz': null});
+  foo.off({'bar:baz': null});
 
   foo.fire('bar:baz');
   assert.equal(eventFired, false);
   assert.equal(event2Fired, false);
 });
 
-QUnit.test('stopObserving multiple handlers', function(assert) {
+QUnit.test('off multiple handlers', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -80,7 +134,7 @@ QUnit.test('stopObserving multiple handlers', function(assert) {
   };
   foo.on({'bar:baz': handler, 'blah:blah': handler2});
 
-  foo.stopObserving({'bar:baz': handler, 'blah:blah': handler2});
+  foo.off({'bar:baz': handler, 'blah:blah': handler2});
 
   foo.fire('bar:baz');
   assert.equal(eventFired, false);
@@ -88,7 +142,7 @@ QUnit.test('stopObserving multiple handlers', function(assert) {
   assert.equal(event2Fired, false);
 });
 
-QUnit.test('stopObserving all events', function(assert) {
+QUnit.test('off all events', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -102,7 +156,7 @@ QUnit.test('stopObserving all events', function(assert) {
   };
   foo.on({'bar:baz': handler, 'blah:blah': handler2});
 
-  foo.stopObserving();
+  foo.off();
 
   foo.fire('bar:baz');
   assert.equal(eventFired, false);
@@ -110,7 +164,7 @@ QUnit.test('stopObserving all events', function(assert) {
   assert.equal(event2Fired, false);
 });
 
-QUnit.test('observe multiple handlers', function(assert) {
+QUnit.test('on multiple handlers', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -153,7 +207,7 @@ QUnit.test('event options', function(assert) {
   assert.equal(someValue, 'sekret');
 });
 
-QUnit.test('trigger', function(assert) {
+QUnit.test('fire', function(assert) {
   var foo = { };
   fabric.util.object.extend(foo, fabric.Observable);
 
@@ -164,7 +218,7 @@ QUnit.test('trigger', function(assert) {
     eventFired = true;
   });
 
-  foo.trigger('bar:baz');
+  foo.fire('bar:baz');
   assert.equal(eventFired, true);
   assert.equal(context, foo);
 });
@@ -193,7 +247,7 @@ QUnit.test('removal of past events', function(assert) {
   foo.on('bar:baz', handler3);
   foo.on('bar:baz', handler4);
   assert.equal(foo.__eventListeners['bar:baz'].length, 4, 'There should be 4 events registered now');
-  foo.trigger('bar:baz');
+  foo.fire('bar:baz');
   assert.equal(foo.__eventListeners['bar:baz'].length, 3, 'There should be 3 events registered now');
   assert.equal(event1Fired, true, 'Event 1 should fire');
   assert.equal(event2Fired, true, 'Event 2 should fire');
@@ -213,7 +267,7 @@ QUnit.test('removal of past events inner loop', function(assert) {
         assert.equal(event2Fired, 0, 'Event 2 should not be fired yet');
         assert.equal(event3Fired, 0, 'Event 3 should not be fired yet');
         assert.equal(event4Fired, 0, 'Event 4 should not be fired yet');
-        foo.trigger('bar:baz');
+        foo.fire('bar:baz');
         assert.equal(foo.__eventListeners['bar:baz'].length, 3, 'There should be 3 handlers registered now');
       },
       handler2 = function() {
@@ -231,7 +285,7 @@ QUnit.test('removal of past events inner loop', function(assert) {
   foo.on('bar:baz', handler2);
   foo.on('bar:baz', handler3);
   foo.on('bar:baz', handler4);
-  foo.trigger('bar:baz');
+  foo.fire('bar:baz');
   assert.equal(event1Fired, 1, 'Event 1 should fire once');
   assert.equal(event2Fired, 2, 'Event 2 should fire twice');
   assert.equal(event3Fired, 2, 'Event 3 should fire twice');
@@ -261,14 +315,14 @@ QUnit.test('adding events', function(assert) {
   fabric.util.object.extend(foo, fabric.Observable);
   foo.on('bar:baz', handler1);
   foo.on('bar:baz', handler2);
-  foo.trigger('bar:baz');
+  foo.fire('bar:baz');
   assert.equal(event1Fired, true, 'Event 1 should fire');
   assert.equal(event2Fired, true, 'Event 2 should fire');
   assert.equal(event3Fired, false, 'Event 3 should not fire');
   assert.equal(event4Fired, false, 'Event 4 should not fire');
-  foo.trigger('bar:baz');
-  assert.equal(event3Fired, true, 'Event 3 should be triggered now');
-  assert.equal(event4Fired, true, 'Event 4 should be triggered now');
+  foo.fire('bar:baz');
+  assert.equal(event3Fired, true, 'Event 3 should be fireed now');
+  assert.equal(event4Fired, true, 'Event 4 should be fireed now');
 });
 
 
@@ -285,7 +339,7 @@ QUnit.test('chaining', function(assert) {
       event2Fired = true;
     });
 
-  foo.trigger('event2').trigger('event1');
+  foo.fire('event2').fire('event1');
 
   assert.equal(event1Fired, true);
   assert.equal(event2Fired, true);
@@ -294,7 +348,7 @@ QUnit.test('chaining', function(assert) {
   event2Fired = false;
 
   foo.off('event1').off('event2');
-  foo.trigger('event2').trigger('event1');
+  foo.fire('event2').fire('event1');
 
   assert.equal(event1Fired, false);
   assert.equal(event2Fired, false);

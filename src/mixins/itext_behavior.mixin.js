@@ -386,6 +386,9 @@
         return;
       }
 
+      // regain focus
+      document.activeElement !== this.hiddenTextarea && this.hiddenTextarea.focus();
+
       var newSelectionStart = this.getSelectionStartFromPointer(options.e),
           currentStart = this.selectionStart,
           currentEnd = this.selectionEnd;
@@ -654,12 +657,6 @@
           charEnd = cursorEnd.charIndex,
           i, styleObj;
       if (lineStart !== lineEnd) {
-        // this.styles 비어있을 경우 방어 코드
-        // 여러 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
-        if (Object.keys(this.styles).length && Object.keys(this.styles[lineEnd]).length === this._unwrappedTextLines[lineEnd].length) {
-          this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length] = this.styles[lineEnd][Object.keys(this.styles[lineEnd]).length - 1];
-        }
-
         // step1 remove the trailing of lineStart
         if (this.styles[lineStart]) {
           for (i = charStart; i < this._unwrappedTextLines[lineStart].length; i++) {
@@ -668,9 +665,7 @@
         }
         // step2 move the trailing of lineEnd to lineStart if needed
         if (this.styles[lineEnd]) {
-          // 위 방어 코드에 의해 마지막 줄 style 의 length 는
-          // 무조건 실제 텍스트의 length 보다 1 기므로 실제 텍스트 length 에 +1 해줌
-          for (i = charEnd; i < this._unwrappedTextLines[lineEnd].length + 1; i++) {
+          for (i = charEnd; i < this._unwrappedTextLines[lineEnd].length; i++) {
             styleObj = this.styles[lineEnd][i];
             if (styleObj) {
               this.styles[lineStart] || (this.styles[lineStart] = { });
@@ -690,13 +685,6 @@
         if (this.styles[lineStart]) {
           styleObj = this.styles[lineStart];
           var diff = charEnd - charStart, numericChar, _char;
-
-          // this.styles 비어있을 경우 방어 코드
-          // 한 라인에 텍스트 남김없이 다 지웠을 때 스타일 초기화 방어 코드
-          if (Object.keys(this.styles).length && Object.keys(this.styles[lineStart]).length === this._unwrappedTextLines[lineStart].length) {
-            this.styles[lineStart][Object.keys(this.styles[lineStart]).length] = this.styles[lineStart][Object.keys(this.styles[lineStart]).length - 1];
-          }
-
           for (i = charStart; i < charEnd; i++) {
             delete styleObj[i];
           }
@@ -753,27 +741,12 @@
       var currentCharStyle,
           newLineStyles = {},
           somethingAdded = false,
-          isEndOfLine = this._unwrappedTextLines[lineIndex].length === charIndex ? true : false,
-          refNumber,  // 참고할 스타일 위치
-          isUpperAddLine = false; // 윗쪽에 빈줄 스타일 추가
-
-      // 커서 위치에 따라 참고할 스타일 위치 변경
-      if (charIndex === this._unwrappedTextLines[lineIndex].length && this._unwrappedTextLines[lineIndex].length !== 0) {
-        refNumber = -1;
-      } else if (charIndex === 0) {
-        refNumber = 0;
-        // this.styles 비어있을 경우 방어 코드
-        if (Object.keys(this.styles).length) {
-          isUpperAddLine = true;
-        }
-      } else if (charIndex < this._unwrappedTextLines[lineIndex].length) {
-        refNumber = 1;
-      }
+          isEndOfLine = this._unwrappedTextLines[lineIndex].length === charIndex;
 
       qty || (qty = 1);
       this.shiftLineStyles(lineIndex, qty);
       if (this.styles[lineIndex]) {
-        currentCharStyle = this.styles[lineIndex][charIndex + refNumber]; // 참고 할 스타일 값 currentCharStyle에 저장
+        currentCharStyle = this.styles[lineIndex][charIndex === 0 ? charIndex : charIndex - 1];
       }
       // we clone styles of all chars
       // after cursor onto the current line
@@ -788,12 +761,6 @@
           }
         }
       }
-
-      // 위에 빈 라인 생길 때 빈 라인 스타일 지정
-      if (isUpperAddLine) {
-        this.styles[lineIndex][0] = newLineStyles[0];
-      }
-
       var styleCarriedOver = false;
       if (somethingAdded && !isEndOfLine) {
         // if is end of line, the extra style we copied
@@ -902,7 +869,13 @@
           this.insertCharStyleObject(cursorLoc.lineIndex + i, 0, addedLines[i], copiedStyle);
         }
         else if (copiedStyle) {
-          this.styles[cursorLoc.lineIndex + i][0] = copiedStyle[0];
+          // this test is required in order to close #6841
+          // when a pasted buffer begins with a newline then
+          // this.styles[cursorLoc.lineIndex + i] and copiedStyle[0]
+          // may be undefined for some reason
+          if (this.styles[cursorLoc.lineIndex + i] && copiedStyle[0]) {
+            this.styles[cursorLoc.lineIndex + i][0] = copiedStyle[0];
+          }
         }
         copiedStyle = copiedStyle && copiedStyle.slice(addedLines[i] + 1);
       }
