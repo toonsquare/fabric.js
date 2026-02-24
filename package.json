@@ -69,8 +69,8 @@
     "testem:ci": "testem ci"
   },
   "optionalDependencies": {
-    "canvas": "^2.8.0",
-    "jsdom": "^19.0.0"
+    "canvas": "^3.0.0",
+    "jsdom": "^22.0.0"
   },
   "devDependencies": {
     "auto-changelog": "^2.3.0",
